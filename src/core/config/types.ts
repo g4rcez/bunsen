@@ -20,6 +20,7 @@ export interface EnvConfig {
   variables: Record<string, string | string[]>
 }
 
+<<<<<<< HEAD
 // ============================================================================
 // Karabiner Types (ported from old dotbot implementation)
 // ============================================================================
@@ -390,6 +391,229 @@ export interface To {
   set_variable?: {
     name: string
     value: boolean | number | string
+||||||| parent of b17f5d3 (refactor(package): update package configuration and exports structure)
+export interface KarabinerManipulator {
+  type: 'basic' | 'mouse_motion_to_scroll'
+  from: {
+    key_code?: string
+    modifiers?: {
+      mandatory?: string[]
+      optional?: string[]
+    }
+=======
+// ============================================================================
+// Karabiner Types (ported from old dotbot implementation)
+// ============================================================================
+
+export type Empty = Record<string | number | symbol, never>
+
+export type Alphabet =
+  | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm'
+  | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z'
+
+export type KeyCode =
+  | 'caps_lock'
+  | 'left_control'
+  | 'left_shift'
+  | 'left_option'
+  | 'left_command'
+  | 'right_control'
+  | 'right_shift'
+  | 'right_option'
+  | 'right_command'
+  | 'fn'
+  | 'return_or_enter'
+  | 'escape'
+  | 'delete_or_backspace'
+  | 'delete_forward'
+  | 'tab'
+  | 'spacebar'
+  | 'hyphen'
+  | 'equal_sign'
+  | 'open_bracket'
+  | 'close_bracket'
+  | 'backslash'
+  | 'non_us_pound'
+  | 'semicolon'
+  | 'quote'
+  | 'grave_accent_and_tilde'
+  | 'comma'
+  | 'period'
+  | 'slash'
+  | 'non_us_backslash'
+  | 'up_arrow'
+  | 'down_arrow'
+  | 'left_arrow'
+  | 'right_arrow'
+  | 'page_up'
+  | 'page_down'
+  | 'home'
+  | 'end'
+  | Alphabet
+  | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '0'
+  | 'f1' | 'f2' | 'f3' | 'f4' | 'f5' | 'f6' | 'f7' | 'f8' | 'f9' | 'f10' | 'f11' | 'f12'
+  | 'f13' | 'f14' | 'f15' | 'f16' | 'f17' | 'f18' | 'f19' | 'f20' | 'f21' | 'f22' | 'f23' | 'f24'
+  | 'display_brightness_decrement'
+  | 'display_brightness_increment'
+  | 'mission_control'
+  | 'launchpad'
+  | 'dashboard'
+  | 'illumination_decrement'
+  | 'illumination_increment'
+  | 'rewind'
+  | 'play_or_pause'
+  | 'fastforward'
+  | 'mute'
+  | 'volume_decrement'
+  | 'volume_increment'
+  | 'eject'
+  | 'apple_display_brightness_decrement'
+  | 'apple_display_brightness_increment'
+  | 'apple_top_case_display_brightness_decrement'
+  | 'apple_top_case_display_brightness_increment'
+  | 'keypad_num_lock'
+  | 'keypad_slash'
+  | 'keypad_asterisk'
+  | 'keypad_hyphen'
+  | 'keypad_plus'
+  | 'keypad_enter'
+  | 'keypad_1' | 'keypad_2' | 'keypad_3' | 'keypad_4' | 'keypad_5'
+  | 'keypad_6' | 'keypad_7' | 'keypad_8' | 'keypad_9' | 'keypad_0'
+  | 'keypad_period'
+  | 'keypad_equal_sign'
+  | 'keypad_comma'
+  | 'vk_none'
+  | 'print_screen'
+  | 'scroll_lock'
+  | 'pause'
+  | 'insert'
+  | 'application'
+  | 'help'
+  | 'power'
+  | 'execute'
+  | 'menu'
+  | 'select'
+  | 'stop'
+  | 'again'
+  | 'undo'
+  | 'cut'
+  | 'copy'
+  | 'paste'
+  | 'find'
+  | 'international1' | 'international2' | 'international3' | 'international4' | 'international5'
+  | 'international6' | 'international7' | 'international8' | 'international9'
+  | 'lang1' | 'lang2' | 'lang3' | 'lang4' | 'lang5' | 'lang6' | 'lang7' | 'lang8' | 'lang9'
+  | 'japanese_eisuu'
+  | 'japanese_kana'
+  | 'japanese_pc_nfer'
+  | 'japanese_pc_xfer'
+  | 'japanese_pc_katakana'
+  | 'keypad_equal_sign_as400'
+  | 'locking_caps_lock'
+  | 'locking_num_lock'
+  | 'locking_scroll_lock'
+  | 'alternate_erase'
+  | 'sys_req_or_attention'
+  | 'cancel'
+  | 'clear'
+  | 'prior'
+  | 'return'
+  | 'separator'
+  | 'out'
+  | 'oper'
+  | 'clear_or_again'
+  | 'cr_sel_or_props'
+  | 'ex_sel'
+  | 'left_alt'
+  | 'left_gui'
+  | 'right_alt'
+  | 'right_gui'
+  | 'vk_consumer_brightness_down'
+  | 'vk_consumer_brightness_up'
+  | 'vk_mission_control'
+  | 'vk_launchpad'
+  | 'vk_dashboard'
+  | 'vk_consumer_illumination_down'
+  | 'vk_consumer_illumination_up'
+  | 'vk_consumer_previous'
+  | 'vk_consumer_play'
+  | 'vk_consumer_next'
+  | 'volume_down'
+  | 'volume_up'
+
+export type RectangleActions =
+  | 'left-half' | 'right-half' | 'maximize' | 'maximize-height'
+  | 'previous-display' | 'next-display' | 'larger' | 'smaller'
+  | 'bottom-half' | 'top-half' | 'center'
+  | 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'
+  | 'restore' | 'first-third' | 'first-two-thirds' | 'center-third'
+  | 'last-two-thirds' | 'last-third' | 'move-left' | 'move-right'
+  | 'move-up' | 'move-down' | 'almost-maximize' | 'fill-left' | 'fill-right'
+  | 'center-half' | 'first-fourth' | 'second-fourth' | 'third-fourth' | 'last-fourth'
+  | 'top-left-sixth' | 'top-center-sixth' | 'top-right-sixth'
+  | 'bottom-left-sixth' | 'bottom-center-sixth' | 'bottom-right-sixth'
+  | 'first-sixth' | 'last-sixth' | 'fullscreen' | 'close' | 'minimize'
+  | 'quit-app' | 'hide-app' | 'cascade-all' | 'cascade-app'
+  | 'tile-2x2' | 'tile-2x3' | 'reveal-desktop-edge'
+  | 'app-next-display' | 'app-prev-display' | 'app-left-half' | 'app-right-half'
+  | 'first-three-fourths' | 'last-three-fourths'
+  | 'top-left-ninth' | 'top-center-ninth' | 'top-right-ninth'
+  | 'middle-left-ninth' | 'middle-center-ninth' | 'middle-right-ninth'
+  | 'bottom-left-ninth' | 'bottom-center-ninth' | 'bottom-right-ninth'
+  | 'top-left-third' | 'top-right-third' | 'bottom-left-third' | 'bottom-right-third'
+  | 'top-left-eighth' | 'top-center-left-eighth' | 'top-center-right-eighth' | 'top-right-eighth'
+  | 'bottom-left-eighth' | 'bottom-center-left-eighth' | 'bottom-center-right-eighth' | 'bottom-right-eighth'
+  | 'center-two-thirds' | 'fill-bottom-left' | 'fill-bottom-right' | 'fill-top-left' | 'fill-top-right'
+  | 'last' | 'next-space' | 'nudge-left' | 'nudge-right' | 'nudge-up' | 'nudge-down'
+  | 'prev-space' | 'snap-bottom-left' | 'snap-bottom-right' | 'snap-top-left' | 'snap-top-right'
+  | 'upper-center' | 'next-display-ratio' | 'prev-display-ratio'
+  | 'stash-left' | 'stash-right' | 'stash-up' | 'stash-down'
+  | 'unstash' | 'cycle-stashed' | 'toggle-stashed' | 'unstash-all' | 'stash-all' | 'stash-all-but-front'
+  | 'reflow-pin'
+
+export interface MouseKey {
+  y?: number
+  x?: number
+  speed_multiplier?: number
+  vertical_wheel?: number
+  horizontal_wheel?: number
+}
+
+export interface SoftwareFunction {
+  iokit_power_management_sleep_system?: Empty
+}
+
+export interface SimultaneousFrom {
+  key_code: KeyCode
+}
+
+export interface SimultaneousOptions {
+  key_down_order?: 'insensitive' | 'strict' | 'strict_inverse'
+  detect_key_down_uninterruptedly?: boolean
+}
+
+export interface Modifiers {
+  optional?: string[]
+  mandatory?: string[]
+}
+
+export interface From {
+  key_code?: KeyCode
+  simultaneous?: SimultaneousFrom[]
+  simultaneous_options?: SimultaneousOptions
+  modifiers?: Modifiers
+}
+
+export interface To {
+  halt?: boolean
+  set_notification_message?: { id: string; text: string }
+  key_code?: KeyCode
+  modifiers?: KeyCode[]
+  shell_command?: string
+  set_variable?: {
+    name: string
+    value: boolean | number | string
+>>>>>>> b17f5d3 (refactor(package): update package configuration and exports structure)
   }
   mouse_key?: MouseKey
   pointing_button?: string
