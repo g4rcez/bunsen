@@ -1,27 +1,70 @@
-import type { KarabinerConfig } from '../core/config/types.ts'
+import { karabiner as karabinerHelpers, BROWSER } from './karabiner-helpers.ts'
+import {
+  createHyperSubLayers,
+  createLeaderLayers,
+  createLeaderDisable,
+  createWhichCommand,
+} from './karabiner-layers.ts'
+import type { KarabinerConfig, KarabinerRule, WhichKey } from '../core/config/types.ts'
 
-export function karabiner(config: KarabinerConfig): KarabinerConfig {
+/**
+ * Karabiner helper utilities
+ * Provides convenient functions for common Karabiner operations
+ */
+export const karabiner = {
+  ...karabinerHelpers,
+  createHyperSubLayers,
+  createLeaderLayers,
+  createLeaderDisable,
+  createWhichCommand,
+}
+
+/**
+ * Export advanced layer creation functions
+ */
+export { createHyperSubLayers, createLeaderLayers, createLeaderDisable, createWhichCommand }
+
+/**
+ * Create a Karabiner configuration with WhichKey documentation
+ *
+ * @example
+ * ```ts
+ * const hyperLayers = createHyperSubLayers({
+ *   t: karabiner.app('WezTerm'),
+ *   w: {
+ *     h: karabiner.rectangle('left-half'),
+ *     l: karabiner.rectangle('right-half'),
+ *   },
+ * })
+ *
+ * const config = createKarabinerConfig(
+ *   hyperLayers.whichKey,
+ *   hyperLayers.layers,
+ *   customRules
+ * )
+ * ```
+ */
+export function createKarabinerConfig(
+  whichKey: WhichKey[],
+  ...rules: Array<KarabinerRule | KarabinerRule[]>
+): {
+  whichKey: WhichKey[]
+  map: KarabinerRule[]
+} {
+  return {
+    whichKey,
+    map: rules.flat(),
+  }
+}
+
+/**
+ * Simple wrapper for Karabiner config (for type safety)
+ */
+export function karabinerConfig(config: KarabinerConfig): KarabinerConfig {
   return config
 }
 
-export function mapKey(from: string, to: string) {
-  return {
-    type: 'basic' as const,
-    from: { key_code: from },
-    to: [{ key_code: to }],
-  }
-}
-
-export function hyperKey(key: string, toIfAlone?: string) {
-  return {
-    type: 'basic' as const,
-    from: { key_code: key },
-    to: [
-      {
-        key_code: 'left_shift',
-        modifiers: ['left_control', 'left_option', 'left_command'],
-      },
-    ],
-    to_if_alone: toIfAlone ? [{ key_code: toIfAlone }] : undefined,
-  }
-}
+/**
+ * Export BROWSER constant
+ */
+export { BROWSER }

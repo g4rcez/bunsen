@@ -15,6 +15,7 @@ import type { NormalizedSymlink } from '../config/types.ts'
 export interface SymlinkOptions {
   dryRun?: boolean
   force?: boolean
+  silent?: boolean
 }
 
 /**
@@ -24,7 +25,7 @@ export async function createSymlink(
   link: NormalizedSymlink,
   options: SymlinkOptions = {}
 ): Promise<boolean> {
-  const { dryRun = false, force = false } = options
+  const { dryRun = false, force = false, silent = false } = options
 
   // Resolve paths
   const target = resolvePath(link.target)
@@ -110,7 +111,9 @@ export async function createSymlink(
     const checksum = await calculateChecksum(source)
     await addSymlinkToState(target, source, checksum)
 
-    logger.success(`Created symlink: ${target} -> ${source}`)
+    if (!silent) {
+      logger.success(`Created symlink: ${target} -> ${source}`)
+    }
     return true
   } catch (error) {
     logger.error(`Failed to create symlink: ${target} -> ${source}`)

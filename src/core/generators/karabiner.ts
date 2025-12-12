@@ -4,7 +4,7 @@
 
 import { writeFile } from '../../utils/fs.ts'
 import { expandPath } from '../symlink/resolver.ts'
-import { updateKarabinerState } from '../state/storage.ts'
+import { updateKarabinerState, updateWhichKeyState } from '../state/storage.ts'
 import { logger } from '../../utils/logger.ts'
 import type { KarabinerConfig } from '../config/types.ts'
 
@@ -49,5 +49,20 @@ export async function generateKarabinerConfig(
     await writeFile(outputPath, content)
     await updateKarabinerState(outputPath)
     logger.success(`Generated Karabiner config: ${outputPath}`)
+  }
+
+  // Generate WhichKey documentation if present
+  if (config.whichKeys && config.whichKeys.length > 0 && config.whichKeyPath) {
+    const whichKeyPath = expandPath(config.whichKeyPath)
+    const whichKeyContent = JSON.stringify({ items: config.whichKeys }, null, 2)
+
+    if (dryRun) {
+      logger.info(`[DRY RUN] Would write WhichKey docs to: ${whichKeyPath}`)
+      logger.debug(`WhichKey preview (${config.whichKeys.length} items)`)
+    } else {
+      await writeFile(whichKeyPath, whichKeyContent)
+      await updateWhichKeyState('karabiner', whichKeyPath)
+      logger.success(`Generated WhichKey docs: ${whichKeyPath} (${config.whichKeys.length} shortcuts)`)
+    }
   }
 }

@@ -197,3 +197,28 @@ export async function getPackagesFromState(): Promise<StateFile['packages']> {
   const state = await loadState()
   return state.packages
 }
+
+/**
+ * Updates WhichKey state
+ */
+export async function updateWhichKeyState(
+  type: 'espanso' | 'karabiner',
+  outputPath: string
+): Promise<void> {
+  const state = await loadState()
+
+  if (!state.whichKey) {
+    state.whichKey = {
+      lastGenerated: new Date().toISOString(),
+    }
+  }
+
+  if (type === 'espanso') {
+    state.whichKey.espansoPath = outputPath
+  } else {
+    state.whichKey.karabinerPath = outputPath
+  }
+
+  state.whichKey.lastGenerated = new Date().toISOString()
+  await saveState(state)
+}

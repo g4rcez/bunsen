@@ -74,16 +74,27 @@ export async function applyCommand(options: ApplyOptions) {
     spinner.start('Creating symlinks...')
     const normalized = normalizeSymlinks(config.symlinks)
     let successCount = 0
+    const createdSymlinks: Array<{ target: string; source: string }> = []
 
     for (const link of normalized) {
-      const success = await createSymlink(link, { dryRun, force })
-      if (success) successCount++
+      const success = await createSymlink(link, { dryRun, force, silent: true })
+      if (success) {
+        successCount++
+        createdSymlinks.push({ target: link.target, source: link.source })
+      }
     }
 
     if (dryRun) {
       spinner.info(`[DRY RUN] Would create ${successCount}/${normalized.length} symlinks`)
     } else {
       spinner.succeed(`Created ${successCount}/${normalized.length} symlinks`)
+    }
+
+    // Output created symlinks with tab indentation
+    if (createdSymlinks.length > 0) {
+      for (const link of createdSymlinks) {
+        logger.plain(`\t${link.target} -> ${link.source}`)
+      }
     }
   }
 

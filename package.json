@@ -1,5 +1,5 @@
 {
-  "name": "bunsen",
+  "name": "@g4rcez/bunsen",
   "type": "module",
   "version": "0.0.1",
   "description": "NixOS flake-inspired dotfiles manager for TypeScript",
@@ -11,14 +11,16 @@
     "bun": ">=1.0.0"
   },
   "bin": {
-    "bunsen": "./bin/bunsen"
+    "bunsen": "./src/cli/index.ts"
   },
   "exports": {
-    "bun": "./src/api/index.ts",
-    "node": "./src/api/index.ts",
-    "require": "./src/api/index.ts",
-    "import": "./src/api/index.ts",
-    "default": "./src/api/index.ts"
+    ".": {
+      "types": "./src/api/index.ts",
+      "bun": "./src/api/index.ts",
+      "import": "./src/api/index.ts",
+      "require": "./src/api/index.ts",
+      "default": "./src/api/index.ts"
+    }
   },
   "scripts": {
     "clean": "bun scripts/clean.ts",
