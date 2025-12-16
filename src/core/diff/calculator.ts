@@ -3,6 +3,7 @@ import { resolve } from 'node:path'
 import type { DotfilesConfig } from '../config/types.js'
 import { loadState } from '../state/storage.js'
 import { normalizeSymlinks } from '../symlink/manager.js'
+import { resolvePath } from '../symlink/resolver.js'
 import { pathExists, readFile } from '../../utils/fs.ts'
 import type { DiffResult, DiffOptions, DiffEntry, CurrentState, DesiredState } from './types.js'
 
@@ -57,9 +58,8 @@ export async function loadDesiredState(config: DotfilesConfig): Promise<DesiredS
     packages: {},
   }
 
-  for (const [target, sourceOrConfig] of Object.entries(symlinks)) {
-    const source = typeof sourceOrConfig === 'string' ? sourceOrConfig : sourceOrConfig.source
-    desiredState.symlinks[target] = source
+  for (const link of symlinks) {
+    desiredState.symlinks[link.target] = link.source
   }
 
   return desiredState
@@ -67,36 +67,49 @@ export async function loadDesiredState(config: DotfilesConfig): Promise<DesiredS
 
 export function compareSymlinks(current: CurrentState, desired: DesiredState): DiffEntry[] {
   const entries: DiffEntry[] = []
-  const currentMap = new Map(current.symlinks.map(s => [s.target, s.source]))
-  const desiredMap = new Map(Object.entries(desired.symlinks))
+  const home = homedir()
 
-  for (const [target, source] of desiredMap) {
-    const currentSource = currentMap.get(target)
-    if (!currentSource) {
+  const currentMap = new Map(
+    current.symlinks.map(s => [
+      resolvePath(s.target, home),
+      { original: s.target, resolved: resolvePath(s.source, home), originalSource: s.source }
+    ])
+  )
+
+  const desiredMap = new Map(
+    Object.entries(desired.symlinks).map(([target, source]) => [
+      resolvePath(target, home),
+      { original: target, resolved: resolvePath(source, home), originalSource: source }
+    ])
+  )
+
+  for (const [resolvedTarget, desiredInfo] of desiredMap) {
+    const currentInfo = currentMap.get(resolvedTarget)
+    if (!currentInfo) {
       entries.push({
         section: 'symlink',
         changeType: 'add',
-        path: target,
-        newValue: source,
+        path: desiredInfo.original,
+        newValue: desiredInfo.originalSource,
       })
-    } else if (currentSource !== source) {
+    } else if (currentInfo.resolved !== desiredInfo.resolved) {
       entries.push({
         section: 'symlink',
         changeType: 'modify',
-        path: target,
-        oldValue: currentSource,
-        newValue: source,
+        path: desiredInfo.original,
+        oldValue: currentInfo.originalSource,
+        newValue: desiredInfo.originalSource,
       })
     }
   }
 
-  for (const [target, source] of currentMap) {
-    if (!desiredMap.has(target)) {
+  for (const [resolvedTarget, currentInfo] of currentMap) {
+    if (!desiredMap.has(resolvedTarget)) {
       entries.push({
         section: 'symlink',
         changeType: 'remove',
-        path: target,
-        oldValue: source,
+        path: currentInfo.original,
+        oldValue: currentInfo.originalSource,
       })
     }
   }
