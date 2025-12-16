@@ -127,11 +127,11 @@ export const VscodeSchema = z.object({
 
 export const DotfilesConfigSchema = z.object({
   hooks: HooksSchema.optional(),
-  espanso: z.instanceof(Espanso),
   env: EnvConfigSchema.optional(),
   vscode: VscodeSchema.optional(),
-  karabiner: z.instanceof(Karabiner),
   symlinks: SymlinkConfigSchema.optional(),
+  espanso: z.instanceof(Espanso).optional(),
+  karabiner: z.instanceof(Karabiner).optional(),
   packages: PackageManagerConfigSchema.optional(),
 })
 

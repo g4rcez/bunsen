@@ -11,6 +11,7 @@ import {
 import { addSymlinkToState, removeSymlinkFromState } from '../state/storage.ts'
 import { logger } from '../../utils/logger.ts'
 import type { NormalizedSymlink } from '../config/types.ts'
+import { homedir } from 'node:os'
 
 export interface SymlinkOptions {
   dryRun?: boolean
@@ -23,29 +24,24 @@ export async function createSymlink(
   options: SymlinkOptions = {}
 ): Promise<boolean> {
   const { dryRun = false, force = false, silent = false } = options
-  const target = resolvePath(link.target)
-  const source = resolvePath(link.source)
-
+  const home = homedir()
+  const target = resolvePath(link.target, home)
+  const source = resolvePath(link.source, home)
   if (!validatePath(target) || !validatePath(source)) {
     logger.error(`Invalid path detected (possible directory traversal): ${target} -> ${source}`)
     return false
   }
-
   if (!pathExists(source)) {
     logger.error(`Source does not exist: ${source}`)
     return false
   }
-
   const conflict = await checkConflict(target, source)
-
   if (conflict.isCorrectSymlink) {
     logger.debug(`Symlink already correct: ${target} -> ${source}`)
     return true
   }
-
   if (conflict.exists) {
     let resolution: ConflictResolution
-
     if (force || link.force) {
       resolution = 'overwrite'
     } else if (link.backup) {
@@ -115,25 +111,20 @@ export async function removeSymlink(
   options: SymlinkOptions = {}
 ): Promise<boolean> {
   const { dryRun = false } = options
-
-  const resolved = resolvePath(target)
-
+  const resolved = resolvePath(target, homedir())
   if (!pathExists(resolved)) {
     logger.debug(`Symlink does not exist: ${resolved}`)
     return true
   }
-
   const type = getPathType(resolved)
   if (type !== 'symlink' && type !== 'broken-symlink') {
     logger.error(`Path is not a symlink: ${resolved}`)
     return false
   }
-
   if (dryRun) {
     logger.info(`[DRY RUN] Would remove symlink: ${resolved}`)
     return true
   }
-
   try {
     await unlink(resolved)
     await removeSymlinkFromState(resolved)

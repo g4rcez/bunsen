@@ -44,7 +44,8 @@ export async function generateEspansoConfig(
   }
 
   if (config.imports && config.imports.length > 0) {
-    espansoYaml.imports = config.imports.map((x) => expandPath(x, homedir()))
+    const home = homedir()
+    espansoYaml.imports = config.imports.map((x) => expandPath(x, home))
   }
   const content = stringify(espansoYaml, { indent: 4 })
   if (dryRun) {

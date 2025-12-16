@@ -257,38 +257,6 @@ karabiner: karabiner({
 })
 ```
 
-**Advanced features with karabiner.ts:**
-
-Bunsen includes the powerful [karabiner.ts](https://github.com/evan-liu/karabiner.ts) library for advanced keyboard customization:
-
-```typescript
-import { karabinerTs, rule, layer, map, withMapper, ifApp } from 'bunsen'
-
-karabiner: karabinerTs({
-  rules: [
-    // Create a Hyper key layer
-    layer('caps_lock', 'hyper-mode').manipulators([
-      // Hyper + HJKL for arrow keys
-      map('h').to('left_arrow'),
-      map('j').to('down_arrow'),
-      map('k').to('up_arrow'),
-      map('l').to('right_arrow'),
-
-      // App launching
-      map('b').to('open', '/Applications/Firefox.app'),
-      map('t').to('open', '/Applications/Alacritty.app'),
-    ]),
-
-    // Application-specific mappings
-    rule('VSCode shortcuts').condition(ifApp('^com\\.microsoft\\.VSCode$'))
-      .manipulators([
-        map('cmd', 't').to('cmd', 'p'),
-      ]),
-  ],
-  outputPath: '~/.config/karabiner/karabiner.json',
-})
-```
-
 ### Window Manager Integration
 
 **AeroSpace:**

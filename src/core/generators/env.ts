@@ -14,7 +14,6 @@ import type { EnvConfig } from '../config/types.ts'
 function generateExports(variables: Record<string, string | string[]>): string {
   const lines: string[] = ['#!/bin/bash', '']
   const home = homedir()
-
   for (const [key, value] of Object.entries(variables)) {
     if (Array.isArray(value)) {
       const joined = value
@@ -43,32 +42,23 @@ export async function generateEnvConfig(
   options: { dryRun?: boolean } = {}
 ): Promise<void> {
   const { dryRun = false } = options
-
-  // Determine export file path
+  const home = homedir()
   const exportFile = config.exportFile
-    ? expandPath(config.exportFile, homedir())
-    : resolve(homedir(), '.config/bunsen/env.sh')
-
-  // Generate export statements
+    ? expandPath(config.exportFile, home)
+    : resolve(home, '.config/bunsen/env.sh')
   const content = generateExports(config.variables)
-
   if (dryRun) {
     logger.info(`[DRY RUN] Would write env exports to: ${exportFile}`)
     logger.debug('Export content:')
     logger.plain(content)
   } else {
-    // Write export file
     await writeFile(exportFile, content)
     logger.success(`Generated env exports: ${exportFile}`)
   }
-
-  // Inject into shell configs
   const shells = config.shells || ['zsh', 'bash']
   const injectedShells: string[] = []
-
   for (const shell of shells) {
     const configPath = getShellConfigPath(shell)
-
     if (dryRun) {
       const hasIntegration = await hasBunsenIntegration(configPath)
       if (hasIntegration) {
@@ -86,8 +76,6 @@ export async function generateEnvConfig(
       }
     }
   }
-
-  // Update state
   if (!dryRun) {
     await updateEnvState(exportFile, injectedShells)
   }
