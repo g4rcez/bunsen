@@ -28,8 +28,6 @@ export default defineConfig({
       VISUAL: 'nvim',
       PAGER: 'less',
       LANG: 'en_US.UTF-8',
-
-      // Custom PATH with user bins first
       PATH: [
         '$HOME/.local/bin',
         '$HOME/.cargo/bin',
@@ -37,8 +35,6 @@ export default defineConfig({
         '$HOME/.npm-global/bin',
         '$PATH',
       ],
-
-      // Development
       NODE_ENV: 'development',
       RUST_BACKTRACE: '1',
     },
@@ -175,8 +171,6 @@ export default defineConfig({
           },
         ],
       },
-
-      // Code snippets
       { trigger: ':log', replace: 'console.log($|$)' },
       { trigger: ':todo', replace: 'TODO: $|$' },
     ],

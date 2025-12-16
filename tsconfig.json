@@ -4,7 +4,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
-    "lib": ["ES2022"],
+    "lib": ["ESNext", "DOM"],
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "moduleResolution": "bundler",
@@ -19,6 +19,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
   }
 }

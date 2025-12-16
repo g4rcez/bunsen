@@ -1,7 +1,7 @@
 {
   "name": "@g4rcez/bunsen",
   "type": "module",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "NixOS flake-inspired dotfiles manager for TypeScript",
   "main": "./src/api/index.ts",
   "types": "./src/api/index.ts",
@@ -39,11 +39,11 @@
     "README.md"
   ],
   "dependencies": {
+    "@types/node": "^25.0.2",
     "commander": "14.0.2",
-    "zod": "4.1.13",
     "ora": "9.0.0",
     "yaml": "2.8.2",
-    "karabiner.ts": "1.36.0"
+    "zod": "4.1.13"
   },
   "devDependencies": {
     "typescript": "5.9.3",

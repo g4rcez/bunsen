@@ -18,41 +18,31 @@ export interface SymlinkOptions {
   silent?: boolean
 }
 
-/**
- * Creates a symlink
- */
 export async function createSymlink(
   link: NormalizedSymlink,
   options: SymlinkOptions = {}
 ): Promise<boolean> {
   const { dryRun = false, force = false, silent = false } = options
-
-  // Resolve paths
   const target = resolvePath(link.target)
   const source = resolvePath(link.source)
 
-  // Validate paths
   if (!validatePath(target) || !validatePath(source)) {
     logger.error(`Invalid path detected (possible directory traversal): ${target} -> ${source}`)
     return false
   }
 
-  // Check if source exists
   if (!pathExists(source)) {
     logger.error(`Source does not exist: ${source}`)
     return false
   }
 
-  // Check for conflicts
   const conflict = await checkConflict(target, source)
 
-  // If symlink already points to correct location, skip
   if (conflict.isCorrectSymlink) {
     logger.debug(`Symlink already correct: ${target} -> ${source}`)
     return true
   }
 
-  // Handle conflicts
   if (conflict.exists) {
     let resolution: ConflictResolution
 
@@ -61,8 +51,6 @@ export async function createSymlink(
     } else if (link.backup) {
       resolution = 'backup'
     } else {
-      // For now, default to backup in non-interactive mode
-      // TODO: Add interactive prompts
       resolution = 'backup'
     }
 
@@ -122,10 +110,10 @@ export async function createSymlink(
   }
 }
 
-/**
- * Removes a symlink
- */
-export async function removeSymlink(target: string, options: SymlinkOptions = {}): Promise<boolean> {
+export async function removeSymlink(
+  target: string,
+  options: SymlinkOptions = {}
+): Promise<boolean> {
   const { dryRun = false } = options
 
   const resolved = resolvePath(target)
@@ -158,9 +146,6 @@ export async function removeSymlink(target: string, options: SymlinkOptions = {}
   }
 }
 
-/**
- * Normalizes symlink configuration
- */
 export function normalizeSymlinks(symlinks: Record<string, unknown>): NormalizedSymlink[] {
   const result: NormalizedSymlink[] = []
 

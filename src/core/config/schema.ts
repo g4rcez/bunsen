@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { Karabiner } from '../../api/karabiner/karabiner'
+import { Espanso } from '../../api/espanso'
 
 export const SymlinkConfigSchema = z.record(
   z.string(),
@@ -13,18 +15,15 @@ export const SymlinkConfigSchema = z.record(
   ])
 )
 
-/**
- * Environment variable configuration schema
- */
 export const EnvConfigSchema = z.object({
-  variables: z.record(z.string(), z.union([z.string(), z.array(z.string())])),
+  variables: z
+    .record(z.string(), z.union([z.string(), z.array(z.string())]))
+    .optional()
+    .default({}),
   shells: z.array(z.enum(['zsh', 'bash', 'fish'])).optional(),
   exportFile: z.string().optional(),
 })
 
-/**
- * Karabiner manipulator schema
- */
 export const KarabinerManipulatorSchema = z.object({
   type: z.enum(['basic', 'mouse_motion_to_scroll']),
   from: z.object({
@@ -64,62 +63,43 @@ export const KarabinerManipulatorSchema = z.object({
     .optional(),
 })
 
-/**
- * Karabiner rule schema
- */
 export const KarabinerRuleSchema = z.object({
   description: z.string(),
   manipulators: z.array(KarabinerManipulatorSchema),
 })
 
-/**
- * Karabiner profile schema
- */
 export const KarabinerProfileSchema = z.object({
   name: z.string(),
   rules: z.array(KarabinerRuleSchema),
 })
 
-/**
- * Karabiner configuration schema
- */
 export const KarabinerConfigSchema = z.object({
   profiles: z.array(KarabinerProfileSchema),
   outputPath: z.string(),
 })
 
-/**
- * Espanso variable schema
- */
 export const EspansoVariableSchema = z.object({
   name: z.string(),
-  type: z.enum(['date', 'shell', 'clipboard', 'echo']),
+  type: z.enum(['date', 'shell', 'clipboard', 'echo', 'random', 'form', 'choice']),
   params: z.record(z.string(), z.unknown()).optional(),
 })
 
-/**
- * Espanso match schema
- */
 export const EspansoMatchSchema = z.object({
-  trigger: z.string(),
+  trigger: z.union([z.string(), z.array(z.string())]).optional(),
   replace: z.string(),
+  label: z.string().optional(),
   vars: z.array(EspansoVariableSchema).optional(),
   word: z.boolean().optional(),
   propagate_case: z.boolean().optional(),
   regex: z.string().optional(),
+  form: z.string().optional(),
 })
 
-/**
- * Espanso configuration schema
- */
 export const EspansoConfigSchema = z.object({
   matches: z.array(EspansoMatchSchema),
   outputPath: z.string(),
 })
 
-/**
- * Package manager item schema (array or object with packages/import)
- */
 const PackageManagerItemSchema = z.union([
   z.array(z.string()),
   z.object({
@@ -128,9 +108,6 @@ const PackageManagerItemSchema = z.union([
   }),
 ])
 
-/**
- * Package manager configuration schema
- */
 export const PackageManagerConfigSchema = z.object({
   brew: PackageManagerItemSchema.optional(),
   apt: PackageManagerItemSchema.optional(),
@@ -139,29 +116,25 @@ export const PackageManagerConfigSchema = z.object({
   autoSudo: z.boolean().optional(),
 })
 
-/**
- * Hooks schema
- */
 export const HooksSchema = z.object({
   beforeApply: z.function().optional(),
   afterApply: z.function().optional(),
 })
 
-/**
- * Main dotfiles configuration schema
- */
-export const DotfilesConfigSchema = z.object({
-  symlinks: SymlinkConfigSchema.optional(),
-  env: EnvConfigSchema.optional(),
-  karabiner: KarabinerConfigSchema.optional(),
-  espanso: EspansoConfigSchema.optional(),
-  packages: PackageManagerConfigSchema.optional(),
-  hooks: HooksSchema.optional(),
+export const VscodeSchema = z.object({
+  extensions: z.string().or(z.array(z.string())),
 })
 
-/**
- * State file schema
- */
+export const DotfilesConfigSchema = z.object({
+  hooks: HooksSchema.optional(),
+  espanso: z.instanceof(Espanso),
+  env: EnvConfigSchema.optional(),
+  vscode: VscodeSchema.optional(),
+  karabiner: z.instanceof(Karabiner),
+  symlinks: SymlinkConfigSchema.optional(),
+  packages: PackageManagerConfigSchema.optional(),
+})
+
 export const StateFileSchema = z.object({
   version: z.string(),
   lastApplied: z.string(),
