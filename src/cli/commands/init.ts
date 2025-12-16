@@ -1,4 +1,4 @@
-import { resolve, basename } from 'path'
+import { resolve, basename } from 'node:path'
 import { homedir } from 'node:os'
 import { pathExists, writeFile } from '../../utils/fs.ts'
 import { logger } from '../../utils/logger.ts'

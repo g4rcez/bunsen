@@ -1,15 +1,9 @@
-/**
- * File parsers for importing package lists from various formats
- */
-
+import { homedir } from 'node:os'
 import { readFile, pathExists } from '../../utils/fs.ts'
 import { expandPath } from '../symlink/resolver.ts'
 
-/**
- * Parses a Brewfile and extracts package names
- */
 export async function parseBrewfile(filePath: string): Promise<string[]> {
-  const expanded = expandPath(filePath)
+  const expanded = expandPath(filePath, homedir())
 
   if (!pathExists(expanded)) {
     throw new Error(`Brewfile not found: ${expanded}`)
@@ -33,8 +27,7 @@ export async function parseBrewfile(filePath: string): Promise<string[]> {
  * Parses an APT package list file (one package per line)
  */
 export async function parseAptList(filePath: string): Promise<string[]> {
-  const expanded = expandPath(filePath)
-
+  const expanded = expandPath(filePath, homedir())
   if (!pathExists(expanded)) {
     throw new Error(`APT list not found: ${expanded}`)
   }

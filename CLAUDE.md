@@ -218,3 +218,10 @@ Bun's native TypeScript support means no build step is ever needed:
 3. **Development Workflow**: Edit TypeScript files → Run immediately → Instant execution
 
 Bun's native TypeScript support eliminates all build complexity and provides instant startup.
+
+## Active Technologies
+- TypeScript 5.9.3 with Bun >=1.0.0 + Commander.js (CLI), Zod (validation), existing Bunsen core modules (config loader, state tracker) (001-diff-command)
+- File-based (reads ~/.config/bunsen/state.json, reads dotfiles.config.ts) (001-diff-command)
+
+## Recent Changes
+- 001-diff-command: Added TypeScript 5.9.3 with Bun >=1.0.0 + Commander.js (CLI), Zod (validation), existing Bunsen core modules (config loader, state tracker)

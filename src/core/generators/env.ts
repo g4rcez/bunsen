@@ -1,7 +1,11 @@
 import { homedir } from 'node:os'
 import { resolve } from 'node:path'
 import { writeFile } from '../../utils/fs.ts'
-import { getShellConfigPath, injectIntoShellConfig, hasBunsenIntegration } from '../../utils/shell.ts'
+import {
+  getShellConfigPath,
+  injectIntoShellConfig,
+  hasBunsenIntegration,
+} from '../../utils/shell.ts'
 import { updateEnvState } from '../state/storage.ts'
 import { expandPath } from '../symlink/resolver.ts'
 import { logger } from '../../utils/logger.ts'
@@ -9,26 +13,20 @@ import type { EnvConfig } from '../config/types.ts'
 
 function generateExports(variables: Record<string, string | string[]>): string {
   const lines: string[] = ['#!/bin/bash', '']
-
+  const home = homedir()
   for (const [key, value] of Object.entries(variables)) {
     if (Array.isArray(value)) {
-      // Handle arrays (like PATH)
-      // Replace $PATH tokens with the actual $PATH variable
       const joined = value
         .map((v) => {
-          // If it's $PATH or ${PATH}, keep it as-is for shell expansion
           if (v === '$PATH' || v === '${PATH}') {
             return '$PATH'
           }
-          // Otherwise, expand any home directory references
-          return expandPath(v).replace(homedir(), '$HOME')
+          return expandPath(v, home).replace(home, '$HOME')
         })
         .join(':')
-
       lines.push(`export ${key}="${joined}"`)
     } else {
-      // Handle regular strings
-      const expanded = expandPath(value).replace(homedir(), '$HOME')
+      const expanded = expandPath(value, home).replace(home, '$HOME')
       lines.push(`export ${key}="${expanded}"`)
     }
   }
@@ -44,32 +42,23 @@ export async function generateEnvConfig(
   options: { dryRun?: boolean } = {}
 ): Promise<void> {
   const { dryRun = false } = options
-
-  // Determine export file path
+  const home = homedir()
   const exportFile = config.exportFile
-    ? expandPath(config.exportFile)
-    : resolve(homedir(), '.config/bunsen/env.sh')
-
-  // Generate export statements
+    ? expandPath(config.exportFile, home)
+    : resolve(home, '.config/bunsen/env.sh')
   const content = generateExports(config.variables)
-
   if (dryRun) {
     logger.info(`[DRY RUN] Would write env exports to: ${exportFile}`)
     logger.debug('Export content:')
     logger.plain(content)
   } else {
-    // Write export file
     await writeFile(exportFile, content)
     logger.success(`Generated env exports: ${exportFile}`)
   }
-
-  // Inject into shell configs
   const shells = config.shells || ['zsh', 'bash']
   const injectedShells: string[] = []
-
   for (const shell of shells) {
     const configPath = getShellConfigPath(shell)
-
     if (dryRun) {
       const hasIntegration = await hasBunsenIntegration(configPath)
       if (hasIntegration) {
@@ -87,8 +76,6 @@ export async function generateEnvConfig(
       }
     }
   }
-
-  // Update state
   if (!dryRun) {
     await updateEnvState(exportFile, injectedShells)
   }

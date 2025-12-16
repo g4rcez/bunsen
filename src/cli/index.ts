@@ -5,6 +5,7 @@ import { initCommand } from './commands/init.ts'
 import { validateCommand } from './commands/validate.ts'
 import { statusCommand } from './commands/status.ts'
 import { applyCommand } from './commands/apply.ts'
+import { diffCommand } from './commands/diff.ts'
 
 const program = new Command()
 
@@ -46,5 +47,16 @@ program
   .option('--espanso-only', 'Only apply Espanso configuration')
   .option('--packages-only', 'Only install packages')
   .action(applyCommand)
+
+program
+  .command('diff')
+  .description('Preview changes before applying')
+  .option('-c, --config <path>', 'Path to config file')
+  .option('--symlinks-only', 'Show only symlink changes')
+  .option('--env-only', 'Show only environment variable changes')
+  .option('--karabiner-only', 'Show only Karabiner config changes')
+  .option('--espanso-only', 'Show only Espanso config changes')
+  .option('--packages-only', 'Show only package changes')
+  .action(diffCommand)
 
 program.parse()

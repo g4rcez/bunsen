@@ -1,6 +1,7 @@
-import { getSymlinksFromState, loadState } from './storage.ts'
-import { pathExists, calculateChecksum, isSymlink } from '../../utils/fs.ts'
+import { homedir } from 'node:os'
+import { calculateChecksum, isSymlink, pathExists } from '../../utils/fs.ts'
 import { resolvePath } from '../symlink/resolver.ts'
+import { getSymlinksFromState, loadState } from './storage.ts'
 
 export interface SymlinkStatus {
   target: string
@@ -16,10 +17,11 @@ export interface SymlinkStatus {
 export async function getSymlinkStatuses(): Promise<SymlinkStatus[]> {
   const trackedSymlinks = await getSymlinksFromState()
   const statuses: SymlinkStatus[] = []
+  const home = homedir()
 
   for (const link of trackedSymlinks) {
-    const target = resolvePath(link.target)
-    const source = resolvePath(link.source)
+    const target = resolvePath(link.target, home)
+    const source = resolvePath(link.source, home)
 
     // Check if symlink exists
     if (!pathExists(target)) {

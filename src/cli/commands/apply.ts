@@ -27,10 +27,8 @@ export async function applyCommand(options: ApplyOptions) {
     config = await loadConfig(options.config)
     spinner.succeed('Configuration loaded')
   } catch (error) {
+    logger.error(error)
     spinner.fail('Failed to load configuration')
-    if (error instanceof Error) {
-      logger.plain(error.message)
-    }
     process.exit(1)
   }
 
@@ -52,7 +50,6 @@ export async function applyCommand(options: ApplyOptions) {
     !options.espansoOnly &&
     !options.packagesOnly
 
-  // Apply packages (BEFORE symlinks, so dependencies are available)
   if ((applyAll || options.packagesOnly) && config.packages) {
     spinner.start('Installing packages...')
     try {
@@ -74,10 +71,14 @@ export async function applyCommand(options: ApplyOptions) {
     spinner.start('Creating symlinks...')
     const normalized = normalizeSymlinks(config.symlinks)
     let successCount = 0
+    const createdSymlinks: Array<{ target: string; source: string }> = []
 
     for (const link of normalized) {
-      const success = await createSymlink(link, { dryRun, force })
-      if (success) successCount++
+      const success = await createSymlink(link, { dryRun, force, silent: true })
+      if (success) {
+        successCount++
+        createdSymlinks.push({ target: link.target, source: link.source })
+      }
     }
 
     if (dryRun) {
@@ -85,9 +86,13 @@ export async function applyCommand(options: ApplyOptions) {
     } else {
       spinner.succeed(`Created ${successCount}/${normalized.length} symlinks`)
     }
+    if (createdSymlinks.length > 0) {
+      for (const link of createdSymlinks) {
+        logger.plain(`\t${link.target} -> ${link.source}`)
+      }
+    }
   }
 
-  // Apply env variables
   if ((applyAll || options.envOnly) && config.env) {
     spinner.start('Generating environment variables...')
     try {
@@ -105,7 +110,6 @@ export async function applyCommand(options: ApplyOptions) {
     }
   }
 
-  // Apply Karabiner
   if ((applyAll || options.karabinerOnly) && config.karabiner) {
     spinner.start('Generating Karabiner configuration...')
     try {
@@ -123,7 +127,6 @@ export async function applyCommand(options: ApplyOptions) {
     }
   }
 
-  // Apply Espanso
   if ((applyAll || options.espansoOnly) && config.espanso) {
     spinner.start('Generating Espanso configuration...')
     try {

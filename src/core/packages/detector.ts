@@ -1,12 +1,5 @@
-/**
- * Package manager detection utilities
- */
-
 import type { PackageManager } from '../config/types.ts'
 
-/**
- * Checks if a command is available in PATH
- */
 async function commandExists(command: string): Promise<boolean> {
   try {
     const proc = Bun.spawn(['which', command], { stdout: 'ignore', stderr: 'ignore' })

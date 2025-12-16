@@ -32,3 +32,4 @@ bun.lockb
 
 # Don't include the bin directory (will be created by compile script)
 bin/
+old/
