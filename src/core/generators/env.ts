@@ -13,14 +13,7 @@ import type { EnvConfig } from '../config/types.ts'
 
 function generateExports(variables: Record<string, string | string[]>): string {
   const lines: string[] = ['#!/bin/bash', '']
-<<<<<<< HEAD
   const home = homedir()
-||||||| parent of 674dba6 (docs(readme,examples,api): update documentation and refactor API structure)
-
-=======
-  const home = homedir()
-
->>>>>>> 674dba6 (docs(readme,examples,api): update documentation and refactor API structure)
   for (const [key, value] of Object.entries(variables)) {
     if (Array.isArray(value)) {
       const joined = value
@@ -51,20 +44,8 @@ export async function generateEnvConfig(
   const { dryRun = false } = options
   const home = homedir()
   const exportFile = config.exportFile
-<<<<<<< HEAD
     ? expandPath(config.exportFile, home)
     : resolve(home, '.config/bunsen/env.sh')
-||||||| parent of 674dba6 (docs(readme,examples,api): update documentation and refactor API structure)
-    ? expandPath(config.exportFile)
-    : resolve(homedir(), '.config/bunsen/env.sh')
-
-  // Generate export statements
-=======
-    ? expandPath(config.exportFile, homedir())
-    : resolve(homedir(), '.config/bunsen/env.sh')
-
-  // Generate export statements
->>>>>>> 674dba6 (docs(readme,examples,api): update documentation and refactor API structure)
   const content = generateExports(config.variables)
   if (dryRun) {
     logger.info(`[DRY RUN] Would write env exports to: ${exportFile}`)
