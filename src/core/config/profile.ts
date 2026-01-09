@@ -1,5 +1,5 @@
 import { hostname } from 'node:os'
-import type { DotfilesConfig, ProfileConfig, ProfileContext, EnvConfig } from './types'
+import type { DotfilesConfig, ProfileConfig, ProfileContext, EnvConfig, Hooks, PackageManagerConfig } from './types'
 
 /**
  * Select which profile to use based on priority
@@ -108,6 +108,9 @@ export function resolveProfile(
       env: mergeEnvConfig(acc.env, profile.env),
       karabiner: acc.karabiner || profile.karabiner,
       espanso: acc.espanso || profile.espanso,
+      hooks: mergeHooks(acc.hooks, profile.hooks),
+      packages: mergePackages(acc.packages, profile.packages),
+      vscode: mergeVscode(acc.vscode, profile.vscode),
     }),
     {} as ProfileConfig
   )
@@ -135,8 +138,9 @@ export function getEffectiveConfig(
     env: mergeEnvConfig(config.env, profileConfig.env),
     karabiner: profileConfig.karabiner || config.karabiner,
     espanso: profileConfig.espanso || config.espanso,
-    packages: config.packages,
-    hooks: config.hooks,
+    packages: mergePackages(config.packages, profileConfig.packages),
+    hooks: mergeHooks(config.hooks, profileConfig.hooks),
+    vscode: mergeVscode(config.vscode, profileConfig.vscode),
     profiles: config.profiles,
   }
 }
@@ -158,4 +162,111 @@ function mergeEnvConfig(
     exportFile: override.exportFile || base.exportFile,
     variables: { ...base.variables, ...override.variables },
   }
+}
+
+/**
+ * Merge two hook configs
+ * Calls parent hooks first, then child hooks
+ */
+function mergeHooks(
+  base?: Hooks,
+  override?: Hooks
+): Hooks | undefined {
+  if (!base && !override) return undefined
+  if (!base) return override
+  if (!override) return base
+
+  return {
+    beforeApply: async () => {
+      if (base.beforeApply) await base.beforeApply()
+      if (override.beforeApply) await override.beforeApply()
+    },
+    afterApply: async () => {
+      if (base.afterApply) await base.afterApply()
+      if (override.afterApply) await override.afterApply()
+    },
+  }
+}
+
+/**
+ * Merge two package configs
+ * Combines package lists from both configs
+ */
+function mergePackages(
+  base?: PackageManagerConfig,
+  override?: PackageManagerConfig
+): PackageManagerConfig | undefined {
+  if (!base && !override) return undefined
+  if (!base) return override
+  if (!override) return base
+
+  const mergePackageList = (
+    baseList?: string[] | { packages?: string[]; import?: string },
+    overrideList?: string[] | { packages?: string[]; import?: string }
+  ) => {
+    if (!baseList && !overrideList) return undefined
+    if (!baseList) return overrideList
+    if (!overrideList) return baseList
+
+    // Handle array format
+    if (Array.isArray(baseList) && Array.isArray(overrideList)) {
+      return [...baseList, ...overrideList]
+    }
+
+    // Handle object format
+    if (!Array.isArray(baseList) && !Array.isArray(overrideList)) {
+      return {
+        packages: [
+          ...(baseList.packages || []),
+          ...(overrideList.packages || []),
+        ],
+        import: overrideList.import || baseList.import,
+      }
+    }
+
+    // Mixed format - convert array to object format
+    const basePackages = Array.isArray(baseList) ? baseList : (baseList.packages || [])
+    const overridePackages = Array.isArray(overrideList) ? overrideList : (overrideList.packages || [])
+
+    const importValue = (!Array.isArray(overrideList) && overrideList.import) ||
+                        (!Array.isArray(baseList) && baseList.import)
+
+    return {
+      packages: [...basePackages, ...overridePackages],
+      ...(importValue ? { import: importValue } : {}),
+    }
+  }
+
+  return {
+    brew: mergePackageList(base.brew, override.brew),
+    apt: mergePackageList(base.apt, override.apt),
+    pacman: mergePackageList(base.pacman, override.pacman),
+    dnf: mergePackageList(base.dnf, override.dnf),
+    autoSudo: override.autoSudo ?? base.autoSudo,
+  }
+}
+
+/**
+ * Merge two vscode configs
+ * Combines extension lists from both configs (deduplicated)
+ */
+function mergeVscode(
+  base?: { extensions: string | string[] },
+  override?: { extensions: string | string[] }
+): { extensions: string | string[] } | undefined {
+  if (!base && !override) return undefined
+  if (!base) return override
+  if (!override) return base
+
+  const baseExtensions = Array.isArray(base.extensions)
+    ? base.extensions
+    : [base.extensions]
+  const overrideExtensions = Array.isArray(override.extensions)
+    ? override.extensions
+    : [override.extensions]
+
+  const combined = [...baseExtensions, ...overrideExtensions]
+  const deduplicated = [...new Set(combined)]
+
+  return { extensions: deduplicated }
 }

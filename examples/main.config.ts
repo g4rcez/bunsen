@@ -1,4 +1,3 @@
-
 import { defineConfig } from "@g4rcez/bunsen";
 import os from "node:os";
 import path from "node:path";
@@ -47,6 +46,24 @@ export default defineConfig({
     // Platform-specific configs
     profiles: {
         osx: {
+            // Profiles now support all main schema features:
+            // - hooks: lifecycle hooks specific to this profile
+            // - packages: profile-specific package manager configs
+            // - vscode: profile-specific VSCode extensions
+            // - env, symlinks, espanso, karabiner: already supported
+
+            // Example:
+            // hooks: {
+            //   beforeApply: () => console.log("macOS setup starting"),
+            //   afterApply: () => console.log("macOS setup complete"),
+            // },
+            // packages: {
+            //   brew: ["iterm2", "raycast"],
+            // },
+            // vscode: {
+            //   extensions: ["ms-vscode-remote.remote-ssh"],
+            // },
+
             // Note: Import your espanso and karabiner configs here
             // import { espanso } from "./bunsen/espanso"
             // import { karabiner } from "./bunsen/karabiner"

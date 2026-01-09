@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { Espanso, Karabiner } from '../../api'
 
 export const SymlinkConfigSchema = z.record(
   z.string(),
@@ -123,14 +124,19 @@ export const VscodeSchema = z.object({
   extensions: z.string().or(z.array(z.string())),
 })
 
+const classConfig = z.any().or(z.record(z.string(), z.any()))
+
 export const ProfileConfigSchema: z.ZodType<any> = z.lazy(() =>
   z.object({
+    hooks: HooksSchema.optional(),
     extends: z.string().optional(),
-    hostname: z.union([z.string(), z.array(z.string())]).optional(),
-    symlinks: SymlinkConfigSchema.optional(),
     env: EnvConfigSchema.optional(),
-    karabiner: z.record(z.any(), z.any()).optional(),
-    espanso: z.record(z.any(), z.any()).optional(),
+    vscode: VscodeSchema.optional(),
+    symlinks: SymlinkConfigSchema.optional(),
+    packages: PackageManagerConfigSchema.optional(),
+    espanso: classConfig.or(z.instanceof(Espanso)).optional(),
+    karabiner: classConfig.or(z.instanceof(Karabiner)).optional(),
+    hostname: z.union([z.string(), z.array(z.string())]).optional(),
   })
 )
 
@@ -138,25 +144,22 @@ export const ProfilesConfigSchema = z.record(z.string(), ProfileConfigSchema)
 
 export const ProfileContextSchema = z.object({
   profile: z.string(),
-  source: z.enum(['cli', 'env', 'hostname', 'default', 'freeform']),
   exists: z.boolean(),
+  source: z.enum(['cli', 'env', 'hostname', 'default', 'freeform']),
 })
 
-export const DotfilesConfigSchema = z.object({
-  // Global sections
-  hooks: HooksSchema.optional(),
-  packages: PackageManagerConfigSchema.optional(),
-
-  // Base config
-  env: EnvConfigSchema.optional(),
-  vscode: VscodeSchema.optional(),
-  symlinks: SymlinkConfigSchema.optional(),
-  espanso: z.record(z.any(), z.any()).optional(),
-  karabiner: z.record(z.any(), z.any()).optional(),
-
-  // Profiles
-  profiles: ProfilesConfigSchema.optional(),
-})
+export const DotfilesConfigSchema = z
+  .object({
+    hooks: HooksSchema.optional(),
+    packages: PackageManagerConfigSchema.optional(),
+    env: EnvConfigSchema.optional(),
+    vscode: VscodeSchema.optional(),
+    symlinks: SymlinkConfigSchema.optional(),
+    espanso: z.record(z.any(), z.any()).optional(),
+    karabiner: z.record(z.any(), z.any()).optional(),
+    profiles: ProfilesConfigSchema.optional(),
+  })
+  .strict()
 
 export const StateFileSchema = z.object({
   version: z.string(),

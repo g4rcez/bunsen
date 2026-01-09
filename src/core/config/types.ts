@@ -661,6 +661,12 @@ export interface ProfileConfig {
   extends?: string
   /** Hostname(s) for auto-selection */
   hostname?: string | string[]
+  /** Profile-specific lifecycle hooks */
+  hooks?: Hooks
+  /** Profile-specific package manager configuration */
+  packages?: PackageManagerConfig
+  /** Profile-specific VSCode extensions */
+  vscode?: { extensions: string | string[] }
   /** Profile-specific symlinks */
   symlinks?: SymlinkConfig
   /** Profile-specific environment */
@@ -707,6 +713,8 @@ export interface DotfilesConfig {
   packages?: PackageManagerConfig
   /** Lifecycle hooks (global) */
   hooks?: Hooks
+  /** VSCode extensions configuration */
+  vscode?: { extensions: string | string[] }
 
   // Profiles object
   /** Profile-specific configurations */
