@@ -32,4 +32,8 @@ export type {
   Parameters,
   Empty,
   Alphabet,
+  // Profile types
+  ProfileConfig,
+  ProfilesConfig,
+  ProfileContext,
 } from '../core/config/types.ts'

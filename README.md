@@ -484,10 +484,7 @@ See [CLAUDE.md](./CLAUDE.md) for detailed architecture documentation.
   ```
 
 #### Other Planned Features
-- [ ] **Rollback/Undo** - Safely revert all Bunsen changes
-- [ ] **Diff Command** - Preview changes before applying
 - [ ] **Template Support** - Use variables and templates in config files
-- [ ] **Git Integration** - Automatically commit dotfiles changes
 - [ ] **Homebrew Cask Support** - Install GUI applications
 - [ ] **System Preferences** - Manage macOS defaults and system settings
 - [ ] **Secrets Management** - Secure handling of API keys and tokens

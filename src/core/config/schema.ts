@@ -1,6 +1,4 @@
 import { z } from 'zod'
-import { Karabiner } from '../../api/karabiner/karabiner'
-import { Espanso } from '../../api/espanso'
 
 export const SymlinkConfigSchema = z.record(
   z.string(),
@@ -125,19 +123,45 @@ export const VscodeSchema = z.object({
   extensions: z.string().or(z.array(z.string())),
 })
 
+export const ProfileConfigSchema: z.ZodType<any> = z.lazy(() =>
+  z.object({
+    extends: z.string().optional(),
+    hostname: z.union([z.string(), z.array(z.string())]).optional(),
+    symlinks: SymlinkConfigSchema.optional(),
+    env: EnvConfigSchema.optional(),
+    karabiner: z.record(z.any(), z.any()).optional(),
+    espanso: z.record(z.any(), z.any()).optional(),
+  })
+)
+
+export const ProfilesConfigSchema = z.record(z.string(), ProfileConfigSchema)
+
+export const ProfileContextSchema = z.object({
+  profile: z.string(),
+  source: z.enum(['cli', 'env', 'hostname', 'default', 'freeform']),
+  exists: z.boolean(),
+})
+
 export const DotfilesConfigSchema = z.object({
+  // Global sections
   hooks: HooksSchema.optional(),
+  packages: PackageManagerConfigSchema.optional(),
+
+  // Base config
   env: EnvConfigSchema.optional(),
   vscode: VscodeSchema.optional(),
   symlinks: SymlinkConfigSchema.optional(),
-  espanso: z.instanceof(Espanso).optional(),
-  karabiner: z.instanceof(Karabiner).optional(),
-  packages: PackageManagerConfigSchema.optional(),
+  espanso: z.record(z.any(), z.any()).optional(),
+  karabiner: z.record(z.any(), z.any()).optional(),
+
+  // Profiles
+  profiles: ProfilesConfigSchema.optional(),
 })
 
 export const StateFileSchema = z.object({
   version: z.string(),
   lastApplied: z.string(),
+  activeProfile: z.string().optional(),
   symlinks: z.array(
     z.object({
       target: z.string(),

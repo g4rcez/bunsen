@@ -61,12 +61,25 @@ export async function saveState(state: StateFile): Promise<void> {
 }
 
 /**
- * Updates the last applied timestamp
+ * Updates the last applied timestamp with profile info
  */
-export async function updateLastApplied(): Promise<void> {
+export async function updateLastApplied(profileName?: string): Promise<void> {
   const state = await loadState()
   state.lastApplied = new Date().toISOString()
+
+  if (profileName) {
+    state.activeProfile = profileName
+  }
+
   await saveState(state)
+}
+
+/**
+ * Gets the currently active profile
+ */
+export async function getActiveProfile(): Promise<string | undefined> {
+  const state = await loadState()
+  return state.activeProfile
 }
 
 /**

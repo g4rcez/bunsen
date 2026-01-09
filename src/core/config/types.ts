@@ -653,21 +653,64 @@ export interface KarabinerTsConfig {
 }
 
 /**
+ * Profile-specific configuration
+ * Can override or extend any base config fields
+ */
+export interface ProfileConfig {
+  /** Profile this extends (inheritance) */
+  extends?: string
+  /** Hostname(s) for auto-selection */
+  hostname?: string | string[]
+  /** Profile-specific symlinks */
+  symlinks?: SymlinkConfig
+  /** Profile-specific environment */
+  env?: EnvConfig
+  /** Profile-specific karabiner */
+  karabiner?: Karabiner
+  /** Profile-specific espanso */
+  espanso?: Espanso
+}
+
+/**
+ * Collection of profiles
+ */
+export type ProfilesConfig = Record<string, ProfileConfig>
+
+/**
+ * Profile selection context
+ */
+export interface ProfileContext {
+  /** Selected profile name */
+  profile: string
+  /** How profile was selected */
+  source: 'cli' | 'env' | 'hostname' | 'default' | 'freeform'
+  /** Whether profile exists in config */
+  exists: boolean
+}
+
+/**
  * Main dotfiles configuration
  */
 export interface DotfilesConfig {
+  // Base config (applies to all profiles)
   /** Symlink declarations */
   symlinks?: SymlinkConfig
   /** Environment variable management */
   env?: EnvConfig
-  /** Karabiner keyboard configuration (Bunsen API) */
+  /** Karabiner keyboard configuration */
   karabiner?: Karabiner
   /** Espanso text expansion configuration */
   espanso?: Espanso
-  /** Package manager configuration */
+
+  // Global sections
+  /** Package manager configuration (global) */
   packages?: PackageManagerConfig
-  /** Lifecycle hooks */
+  /** Lifecycle hooks (global) */
   hooks?: Hooks
+
+  // Profiles object
+  /** Profile-specific configurations */
+  profiles?: ProfilesConfig
 }
 
 /**
@@ -687,6 +730,8 @@ export interface NormalizedSymlink {
 export interface StateFile {
   version: string
   lastApplied: string
+  /** Currently active profile */
+  activeProfile?: string
   symlinks: Array<{
     target: string
     source: string

@@ -10,6 +10,7 @@ import { logger } from '../../utils/logger.ts'
 
 export interface ApplyOptions {
   config?: string
+  profile?: string
   dryRun?: boolean
   force?: boolean
   symlinksOnly?: boolean
@@ -22,16 +23,41 @@ export interface ApplyOptions {
 export async function applyCommand(options: ApplyOptions) {
   const { dryRun = false, force = false } = options
   const spinner = ora('Loading configuration...').start()
-  let config
+
+  let loadedConfig
   try {
-    config = await loadConfig(options.config)
-    spinner.succeed('Configuration loaded')
+    loadedConfig = await loadConfig({
+      configPath: options.config,
+      profile: options.profile,
+    })
+    const profileInfo = loadedConfig.context.profile ? ` (profile: ${loadedConfig.context.profile})` : ''
+    spinner.succeed(`Configuration loaded${profileInfo}`)
   } catch (error) {
     logger.error(error)
     spinner.fail('Failed to load configuration')
     process.exit(1)
   }
 
+  const config = loadedConfig.config
+  const { context } = loadedConfig
+
+  // Show profile info if selected
+  if (context.profile) {
+    const sourceLabel = {
+      cli: 'CLI parameter',
+      env: 'environment variable',
+      hostname: 'hostname match',
+      default: 'default profile',
+      freeform: 'free-form',
+    }[context.source]
+
+    logger.info(`Profile: ${context.profile} (${sourceLabel})`)
+    if (!context.exists) {
+      logger.warn('Profile not defined in config, using base config only')
+    }
+  }
+
+  // Run global hooks beforeApply
   if (config.hooks?.beforeApply) {
     try {
       await config.hooks.beforeApply()
@@ -50,6 +76,7 @@ export async function applyCommand(options: ApplyOptions) {
     !options.espansoOnly &&
     !options.packagesOnly
 
+  // Apply global packages
   if ((applyAll || options.packagesOnly) && config.packages) {
     spinner.start('Installing packages...')
     try {
@@ -67,7 +94,8 @@ export async function applyCommand(options: ApplyOptions) {
     }
   }
 
-  if ((applyAll || options.symlinksOnly) && config.symlinks) {
+  // Apply symlinks
+  if ((applyAll || options.symlinksOnly) && config.symlinks && Object.keys(config.symlinks).length > 0) {
     spinner.start('Creating symlinks...')
     const normalized = normalizeSymlinks(config.symlinks)
     let successCount = 0
@@ -93,10 +121,11 @@ export async function applyCommand(options: ApplyOptions) {
     }
   }
 
+  // Apply env
   if ((applyAll || options.envOnly) && config.env) {
     spinner.start('Generating environment variables...')
     try {
-      await generateEnvConfig(config.env, { dryRun })
+      await generateEnvConfig(config.env, { dryRun, profileName: context.profile || undefined })
       if (dryRun) {
         spinner.info('[DRY RUN] Would generate env config')
       } else {
@@ -110,6 +139,7 @@ export async function applyCommand(options: ApplyOptions) {
     }
   }
 
+  // Apply karabiner
   if ((applyAll || options.karabinerOnly) && config.karabiner) {
     spinner.start('Generating Karabiner configuration...')
     try {
@@ -127,6 +157,7 @@ export async function applyCommand(options: ApplyOptions) {
     }
   }
 
+  // Apply espanso
   if ((applyAll || options.espansoOnly) && config.espanso) {
     spinner.start('Generating Espanso configuration...')
     try {
@@ -144,12 +175,12 @@ export async function applyCommand(options: ApplyOptions) {
     }
   }
 
-  // Update state
-  if (!dryRun) {
-    await updateLastApplied()
+  // Update state with profile info
+  if (!dryRun && context.profile) {
+    await updateLastApplied(context.profile)
   }
 
-  // Run after hook
+  // Run global hooks afterApply
   if (config.hooks?.afterApply) {
     try {
       await config.hooks.afterApply()

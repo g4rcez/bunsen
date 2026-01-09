@@ -11,8 +11,17 @@ import { expandPath } from '../symlink/resolver.ts'
 import { logger } from '../../utils/logger.ts'
 import type { EnvConfig } from '../config/types.ts'
 
-function generateExports(variables: Record<string, string | string[]>): string {
+function generateExports(
+  variables: Record<string, string | string[]>,
+  profileName?: string
+): string {
   const lines: string[] = ['#!/bin/bash', '']
+
+  // Add BUNSEN_PROFILE if provided
+  if (profileName) {
+    lines.push(`export BUNSEN_PROFILE="${profileName}"`)
+  }
+
   const home = homedir()
   for (const [key, value] of Object.entries(variables)) {
     if (Array.isArray(value)) {
@@ -39,14 +48,14 @@ function generateExports(variables: Record<string, string | string[]>): string {
  */
 export async function generateEnvConfig(
   config: EnvConfig,
-  options: { dryRun?: boolean } = {}
+  options: { dryRun?: boolean; profileName?: string } = {}
 ): Promise<void> {
-  const { dryRun = false } = options
+  const { dryRun = false, profileName } = options
   const home = homedir()
   const exportFile = config.exportFile
     ? expandPath(config.exportFile, home)
     : resolve(home, '.config/bunsen/env.sh')
-  const content = generateExports(config.variables)
+  const content = generateExports(config.variables, profileName)
   if (dryRun) {
     logger.info(`[DRY RUN] Would write env exports to: ${exportFile}`)
     logger.debug('Export content:')

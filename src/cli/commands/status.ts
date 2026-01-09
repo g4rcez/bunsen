@@ -1,18 +1,27 @@
 import { getStatusSummary, getSymlinkStatuses } from '../../core/state/tracker.ts'
-import { getPackagesFromState } from '../../core/state/storage.ts'
+import { getPackagesFromState, getActiveProfile } from '../../core/state/storage.ts'
 import { logger } from '../../utils/logger.ts'
 import { colors } from '../../utils/colors.ts'
 
-export async function statusCommand() {
+export interface StatusOptions {
+  config?: string
+  profile?: string
+}
+
+export async function statusCommand(_options: StatusOptions = {}) {
   const summary = await getStatusSummary()
   const statuses = await getSymlinkStatuses()
   const packagesState = await getPackagesFromState()
+  const activeProfile = await getActiveProfile()
 
   logger.info('Bunsen Status')
   logger.plain('')
 
   // Overall summary
   logger.plain(colors.bold('Summary:'))
+  if (activeProfile) {
+    logger.plain(`  Active profile: ${colors.cyan(activeProfile)}`)
+  }
   logger.plain(`  Total symlinks: ${summary.total}`)
   logger.plain(`  ${colors.green('✓')} OK: ${summary.ok}`)
   if (summary.missing > 0) logger.plain(`  ${colors.red('✗')} Missing: ${summary.missing}`)
