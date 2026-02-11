@@ -52,6 +52,7 @@ program
   .command('apply')
   .description('Apply the dotfiles configuration')
   .option('-c, --config <path>', 'Path to config file')
+  .option('-p, --profile <name>', 'Use specific profile')
   .option('--dry-run', 'Preview changes without applying')
   .option('-f, --force', 'Skip confirmation prompts')
   .option('--symlinks-only', 'Only apply symlinks')
@@ -61,7 +62,7 @@ program
   .option('--packages-only', 'Only install packages')
   .action((options) => {
     const globalOpts = program.opts()
-    applyCommand({ ...options, profile: globalOpts.profile })
+    applyCommand({ ...options, profile: options.profile || globalOpts.profile })
   })
 
 program

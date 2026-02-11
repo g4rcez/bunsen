@@ -75,9 +75,11 @@ export async function injectIntoShellConfig(
   }
 
   // Add new Bunsen section
+  const home = homedir()
+  const portablePath = exportFilePath.replace(home, '$HOME')
   const injection = `
 ${MARKER_BEGIN}
-source "${exportFilePath}"
+[ -z "$BUNSEN_ENV_LOADED" ] && [ -f "${portablePath}" ] && source "${portablePath}"
 ${MARKER_END}
 `
 

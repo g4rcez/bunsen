@@ -22,6 +22,10 @@ function generateExports(
     lines.push(`export BUNSEN_PROFILE="${profileName}"`)
   }
 
+  // Mark as loaded to prevent duplicate sourcing
+  lines.push('export BUNSEN_ENV_LOADED="true"')
+
+
   const home = homedir()
   for (const [key, value] of Object.entries(variables)) {
     if (Array.isArray(value)) {
@@ -54,7 +58,7 @@ export async function generateEnvConfig(
   const home = homedir()
   const exportFile = config.exportFile
     ? expandPath(config.exportFile, home)
-    : resolve(home, '.config/bunsen/env.sh')
+    : '$HOME/.config/bunsen/env.sh'
   const content = generateExports(config.variables, profileName)
   if (dryRun) {
     logger.info(`[DRY RUN] Would write env exports to: ${exportFile}`)

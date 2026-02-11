@@ -33,7 +33,6 @@ export default defineConfig({
     },
   },
 
-  // Profile-specific configs
   profiles: {
     default: {
       // Fallback profile

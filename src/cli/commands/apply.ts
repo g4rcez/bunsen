@@ -122,17 +122,22 @@ export async function applyCommand(options: ApplyOptions) {
   }
 
   // Apply env
-  if ((applyAll || options.envOnly) && config.env) {
-    spinner.start('Generating environment variables...')
+  if ((applyAll || options.envOnly) && (config.env || context.profile)) {
+    spinner.start(config.env ? 'Generating environment variables...' : 'Setting profile environment variable...')
     try {
-      await generateEnvConfig(config.env, { dryRun, profileName: context.profile || undefined })
+      const envConfig = config.env || {
+        shells: ['zsh', 'bash'],
+        variables: {},
+      }
+      // @ts-expect-error - EnvConfig vs minimal config
+      await generateEnvConfig(envConfig, { dryRun, profileName: context.profile || undefined })
       if (dryRun) {
-        spinner.info('[DRY RUN] Would generate env config')
+        spinner.info(config.env ? '[DRY RUN] Would generate env config' : '[DRY RUN] Would set profile environment variable')
       } else {
-        spinner.succeed('Generated environment variables')
+        spinner.succeed(config.env ? 'Generated environment variables' : 'Set profile environment variable')
       }
     } catch (error) {
-      spinner.fail('Failed to generate env config')
+      spinner.fail(config.env ? 'Failed to generate env config' : 'Failed to set BUNSEN_PROFILE')
       if (error instanceof Error) {
         logger.error(error.message)
       }

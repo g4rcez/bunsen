@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { Espanso, Karabiner } from '../../api'
 
 export const SymlinkConfigSchema = z.record(
   z.string(),
@@ -126,6 +125,27 @@ export const VscodeSchema = z.object({
 
 const classConfig = z.any().or(z.record(z.string(), z.any()))
 
+// Espanso duck-type: has trigger, path, matches, imports
+const EspansoDuckSchema = z
+  .object({
+    trigger: z.string(),
+    path: z.string(),
+    whichKeyPath: z.string(),
+    matches: z.array(z.any()),
+    imports: z.array(z.string()),
+  })
+  .passthrough()
+
+// Karabiner duck-type: has configPath, whichKeyPath, global, profiles
+const KarabinerDuckSchema = z
+  .object({
+    configPath: z.string(),
+    whichKeyPath: z.string(),
+    global: z.object({}).passthrough(),
+    profiles: z.array(z.any()),
+  })
+  .passthrough()
+
 export const ProfileConfigSchema: z.ZodType<any> = z.lazy(() =>
   z.object({
     hooks: HooksSchema.optional(),
@@ -134,8 +154,8 @@ export const ProfileConfigSchema: z.ZodType<any> = z.lazy(() =>
     vscode: VscodeSchema.optional(),
     symlinks: SymlinkConfigSchema.optional(),
     packages: PackageManagerConfigSchema.optional(),
-    espanso: classConfig.or(z.instanceof(Espanso)).optional(),
-    karabiner: classConfig.or(z.instanceof(Karabiner)).optional(),
+    espanso: classConfig.or(EspansoDuckSchema).optional(),
+    karabiner: classConfig.or(KarabinerDuckSchema).optional(),
     hostname: z.union([z.string(), z.array(z.string())]).optional(),
   })
 )

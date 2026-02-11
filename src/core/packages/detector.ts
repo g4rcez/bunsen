@@ -10,17 +10,12 @@ async function commandExists(command: string): Promise<boolean> {
   }
 }
 
-/**
- * Detects available package managers on the system
- */
 export async function detectAvailableManagers(): Promise<PackageManager[]> {
   const managers: PackageManager[] = []
-
   if (await commandExists('brew')) managers.push('brew')
   if (await commandExists('apt-get')) managers.push('apt')
   if (await commandExists('pacman')) managers.push('pacman')
   if (await commandExists('dnf')) managers.push('dnf')
-
   return managers
 }
 

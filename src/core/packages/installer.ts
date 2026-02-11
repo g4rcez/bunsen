@@ -1,7 +1,3 @@
-/**
- * Package installation logic with idempotency
- */
-
 import { logger } from '../../utils/logger.ts'
 import { PACKAGE_MANAGER_COMMANDS } from './commands.ts'
 import type { PackageManager, PackageInstallResult } from '../config/types.ts'

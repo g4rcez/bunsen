@@ -106,8 +106,8 @@ export function resolveProfile(
     (acc, profile) => ({
       symlinks: { ...acc.symlinks, ...profile.symlinks },
       env: mergeEnvConfig(acc.env, profile.env),
-      karabiner: acc.karabiner || profile.karabiner,
-      espanso: acc.espanso || profile.espanso,
+      karabiner: mergeKarabiner(acc.karabiner, profile.karabiner),
+      espanso: mergeEspanso(acc.espanso, profile.espanso),
       hooks: mergeHooks(acc.hooks, profile.hooks),
       packages: mergePackages(acc.packages, profile.packages),
       vscode: mergeVscode(acc.vscode, profile.vscode),
@@ -136,12 +136,116 @@ export function getEffectiveConfig(
   return {
     symlinks: { ...config.symlinks, ...profileConfig.symlinks },
     env: mergeEnvConfig(config.env, profileConfig.env),
-    karabiner: profileConfig.karabiner || config.karabiner,
-    espanso: profileConfig.espanso || config.espanso,
+    karabiner: mergeKarabiner(config.karabiner, profileConfig.karabiner),
+    espanso: mergeEspanso(config.espanso, profileConfig.espanso),
     packages: mergePackages(config.packages, profileConfig.packages),
     hooks: mergeHooks(config.hooks, profileConfig.hooks),
     vscode: mergeVscode(config.vscode, profileConfig.vscode),
     profiles: config.profiles,
+  }
+}
+
+/**
+ * Merge two karabiner configs
+ */
+function mergeKarabiner(base: any, override: any): any {
+  if (!base && !override) return undefined
+  if (!base) return override
+  if (!override) return base
+
+  const DEFAULT_CONFIG_PATH = '~/.config/karabiner/karabiner.json'
+  const DEFAULT_WHICH_KEY_PATH = '~/.config/karabiner/karabiner-whichkey.json'
+
+  const overrideConfigPath = override.configPath || override.outputPath
+  const baseConfigPath = base.configPath || base.outputPath
+
+  // Determine configPath:
+  // 1. If override has no path, use base
+  // 2. If override has default path and base has custom path, use base
+  // 3. Otherwise use override
+  let configPath = overrideConfigPath
+  if (!configPath) {
+    configPath = baseConfigPath
+  } else if (
+    configPath === DEFAULT_CONFIG_PATH &&
+    baseConfigPath &&
+    baseConfigPath !== DEFAULT_CONFIG_PATH
+  ) {
+    configPath = baseConfigPath
+  }
+
+  const overrideWhichKeyPath = override.whichKeyPath
+  const baseWhichKeyPath = base.whichKeyPath
+
+  let whichKeyPath = overrideWhichKeyPath
+  if (!whichKeyPath) {
+    whichKeyPath = baseWhichKeyPath
+  } else if (
+    whichKeyPath === DEFAULT_WHICH_KEY_PATH &&
+    baseWhichKeyPath &&
+    baseWhichKeyPath !== DEFAULT_WHICH_KEY_PATH
+  ) {
+    whichKeyPath = baseWhichKeyPath
+  }
+
+  return {
+    ...base,
+    ...override,
+    configPath, // normalized to configPath for generator
+    outputPath: configPath, // keep outputPath for interface compliance
+    whichKeyPath,
+    global: { ...base.global, ...override.global },
+    profiles: [...(base.profiles || []), ...(override.profiles || [])],
+  }
+}
+
+/**
+ * Merge two espanso configs
+ */
+function mergeEspanso(base: any, override: any): any {
+  if (!base && !override) return undefined
+  if (!base) return override
+  if (!override) return base
+
+  const DEFAULT_PATH = '~/.config/espanso/match/base.yml'
+  const DEFAULT_WHICH_KEY_PATH = '~/.config/espanso/whichkey.json'
+
+  const overridePath = override.path || override.outputPath
+  const basePath = base.path || base.outputPath
+
+  let path = overridePath
+  if (!path) {
+    path = basePath
+  } else if (
+    path === DEFAULT_PATH &&
+    basePath &&
+    basePath !== DEFAULT_PATH
+  ) {
+    path = basePath
+  }
+
+  const overrideWhichKeyPath = override.whichKeyPath
+  const baseWhichKeyPath = base.whichKeyPath
+
+  let whichKeyPath = overrideWhichKeyPath
+  if (!whichKeyPath) {
+    whichKeyPath = baseWhichKeyPath
+  } else if (
+    whichKeyPath === DEFAULT_WHICH_KEY_PATH &&
+    baseWhichKeyPath &&
+    baseWhichKeyPath !== DEFAULT_WHICH_KEY_PATH
+  ) {
+    whichKeyPath = baseWhichKeyPath
+  }
+
+  return {
+    ...base,
+    ...override,
+    path, // normalized to path for generator
+    outputPath: path, // keep outputPath for interface compliance
+    whichKeyPath,
+    matches: [...(base.matches || []), ...(override.matches || [])],
+    imports: [...(base.imports || []), ...(override.imports || [])],
   }
 }
 
