@@ -1,7 +1,7 @@
 {
   "name": "@g4rcez/bunsen",
   "type": "module",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "NixOS flake-inspired dotfiles manager for TypeScript",
   "main": "./src/api/index.ts",
   "types": "./src/api/index.ts",
